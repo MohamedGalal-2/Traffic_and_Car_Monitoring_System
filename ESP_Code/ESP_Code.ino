@@ -66,5 +66,18 @@ void setup()
 // Main loop
 void loop() 
 {
-  
+  // Check if data is available from NodeMCU
+  if (UARTSerial.available()) 
+  {
+    String receivedData = UARTSerial.readStringUntil('\n');  // Read data until newline
+
+    // Print the received data to the Serial Monitor
+    Serial.println("Data received from NodeMCU: " + receivedData);
+
+    // Add your logic here to process the data
+    if (receivedData.length() > 0 && receivedData.charAt(0) == 'F') 
+    {
+      Serial.println("Received 'F' from NodeMCU");
+    }
+  }
 }

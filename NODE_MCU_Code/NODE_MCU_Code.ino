@@ -23,22 +23,14 @@ void setup() {
 
 void loop() 
 {
-  // Check if data is received from ESP32 via SoftwareSerial
   if (ESPSerial.available()) 
   {
-    // Read data from ESP32
     String receivedData = ESPSerial.readStringUntil('\n');
-
-    // Print received data to Serial Monitor
     Serial.println("Data received from ESP32: " + receivedData);
 
-    // Optional: Respond back to ESP32
-    ESPSerial.println("Received: " + receivedData);
-  }
-
-  if (Serial.available()) 
-  {
-    String receivedData = Serial.readStringUntil('\n');
-    Serial.println("Data received from ESP32: " + receivedData);
+    if (receivedData.length() > 0 && receivedData.charAt(0) == 'F') 
+    {
+      ESPSerial.println("(");
+    }
   }
 }
