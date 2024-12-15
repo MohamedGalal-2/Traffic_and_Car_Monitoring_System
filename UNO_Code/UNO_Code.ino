@@ -10,18 +10,20 @@
 #define IR_SENSOR_RIGHT A4
 #define IR_SENSOR_LEFT  A3
 
-// Set threshold
-const int STOP_DISTANCE = 7;    // Distance to stop the car in cm
-
 // Set car speed profiles
-int SPEED = 255;
 const int HIGH_SPEED = 255;
 const int MEDIUM_SPEED = 170;
 const int LOW_SPEED = 85;
+int SPEED = MEDIUM_SPEED;
+
+// Define stopping distances
+const int STOP_DISTANCE_HIGH_SPEED = 30; // Stopping distance for high speed
+const int STOP_DISTANCE_MEDIUM_SPEED = 20;
+const int STOP_DISTANCE_LOW_SPEED = 15;
 
 SoftwareSerial HC05(9, 10); // RX, TX
 
-//initial motors pin
+// Initialize motor pins
 AF_DCMotor motor1(1);
 AF_DCMotor motor2(2);
 AF_DCMotor motor3(3);
@@ -29,8 +31,7 @@ AF_DCMotor motor4(4);
 
 char command;
 
-void setup()
-{
+void setup() {
   // Initialize pins
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
@@ -40,44 +41,46 @@ void setup()
   // Start serial communication for debugging
   Serial.begin(9600);
 
-  //Set the baud rate to your Bluetooth module.
+  // Set the baud rate for Bluetooth module
   HC05.begin(9600);
 }
 
-void loop() 
-{
-  // Measure distance of the obstacle
-  int obstacleDistance = getDistance();
+void loop() {
+  static unsigned long lastCheckTime = 0;
+  unsigned long currentTime = millis();
 
-  // Check if there is an obstacle in the road
-  if (obstacleDistance <= STOP_DISTANCE) 
-  {
-    stop();
-    Serial.println("Stop");
-    Serial.println(obstacleDistance); // Debugging
-  }
-  else // Debugging
-  {
-    Serial.println(obstacleDistance); 
+  // Measure distance at regular intervals
+  if (currentTime - lastCheckTime >= 50) { // Check every 50ms
+    lastCheckTime = currentTime;
+    int obstacleDistance = getDistance();
+    int stopDistance = getStopDistance();
+
+    if ((obstacleDistance <= stopDistance) && (obstacleDistance != 0)) {
+      stop();
+      Serial.print("Obstacle detected at: ");
+      Serial.println(obstacleDistance);
+    }
   }
 
-  // Check if there is a Bluetooth connection established
-  if (HC05.available() > 0) 
-  {
+  // Check for Bluetooth commands
+  if (HC05.available() > 0) {
     command = HC05.read();
+    stop(); // Initialize with motors stopped
 
-    stop(); //initialize with motors stoped
-    Serial.println(command); // Debugging
+    Serial.print("Command: ");
+    Serial.println(command);
+    Serial.print("Speed: ");
+    Serial.println(SPEED);
 
     switch (command) 
     {
-      case 'H'
+      case 'H':
         SPEED = HIGH_SPEED;
         break;
-      case 'M'
+      case 'M':
         SPEED = MEDIUM_SPEED;
         break;
-      case 'N'
+      case 'N':
         SPEED = LOW_SPEED;
         break;
       case 'F':
@@ -99,105 +102,93 @@ void loop()
   }
 }
 
-void forward()
-{
-  motor1.setSpeed(255); //Define maximum velocity
-  motor1.run(FORWARD);  //rotate the motor clockwise
-  motor2.setSpeed(255); //Define maximum velocity
-  motor2.run(FORWARD);  //rotate the motor clockwise
-  motor3.setSpeed(255); //Define maximum velocity
-  motor3.run(FORWARD);  //rotate the motor clockwise
-  motor4.setSpeed(255); //Define maximum velocity
-  motor4.run(FORWARD);  //rotate the motor clockwise
+void forward(int CAR_SPEED) {
+  motor1.setSpeed(CAR_SPEED);
+  motor1.run(FORWARD);
+  motor2.setSpeed(CAR_SPEED);
+  motor2.run(FORWARD);
+  motor3.setSpeed(CAR_SPEED);
+  motor3.run(FORWARD);
+  motor4.setSpeed(CAR_SPEED);
+  motor4.run(FORWARD);
 }
 
-void back(int CAR_SPEED)
-{
-  motor1.setSpeed(CAR_SPEED); //Define maximum velocity
-  motor1.run(BACKWARD); //rotate the motor anti-clockwise
-  motor2.setSpeed(CAR_SPEED); //Define maximum velocity
-  motor2.run(BACKWARD); //rotate the motor anti-clockwise
-  motor3.setSpeed(CAR_SPEED); //Define maximum velocity
-  motor3.run(BACKWARD); //rotate the motor anti-clockwise
-  motor4.setSpeed(CAR_SPEED); //Define maximum velocity
-  motor4.run(BACKWARD); //rotate the motor anti-clockwise
+void back(int CAR_SPEED) {
+  motor1.setSpeed(CAR_SPEED);
+  motor1.run(BACKWARD);
+  motor2.setSpeed(CAR_SPEED);
+  motor2.run(BACKWARD);
+  motor3.setSpeed(CAR_SPEED);
+  motor3.run(BACKWARD);
+  motor4.setSpeed(CAR_SPEED);
+  motor4.run(BACKWARD);
 }
 
-void left(int CAR_SPEED)
-{
-  motor1.setSpeed(CAR_SPEED); //Define maximum velocity
-  motor1.run(BACKWARD); //rotate the motor clockwise
-  motor2.setSpeed(CAR_SPEED); //Define lower velocity
-  motor2.run(FORWARD); //rotate the motor clockwise
-  motor3.setSpeed(CAR_SPEED); //Define maximum velocity
-  motor3.run(FORWARD);  //rotate the motor clockwise
-  motor4.setSpeed(CAR_SPEED); // Define lower velocity
-  motor4.run(FORWARD);  //rotate the motor clockwise
+void left(int CAR_SPEED) {
+  motor1.setSpeed(CAR_SPEED);
+  motor1.run(BACKWARD);
+  motor2.setSpeed(CAR_SPEED);
+  motor2.run(FORWARD);
+  motor3.setSpeed(CAR_SPEED);
+  motor3.run(FORWARD);
+  motor4.setSpeed(CAR_SPEED);
+  motor4.run(FORWARD);
 }
 
-void right()
-{
-  motor1.setSpeed(CAR_SPEED); //Define lower velocity
-  motor1.run(FORWARD);  //rotate the motor clockwise
-  motor2.setSpeed(CAR_SPEED); //Define maximum velocity
-  motor2.run(BACKWARD);  //rotate the motor clockwise
-  motor3.setSpeed(CAR_SPEED); //Define lower velocity
-  motor3.run(FORWARD); //rotate the motor clockwise
-  motor4.setSpeed(CAR_SPEED); //Define maximum velocity
-  motor4.run(FORWARD); //rotate the motor clockwise
+void right(int CAR_SPEED) {
+  motor1.setSpeed(CAR_SPEED);
+  motor1.run(FORWARD);
+  motor2.setSpeed(CAR_SPEED);
+  motor2.run(BACKWARD);
+  motor3.setSpeed(CAR_SPEED);
+  motor3.run(FORWARD);
+  motor4.setSpeed(CAR_SPEED);
+  motor4.run(FORWARD);
 }
 
-void stop()
-{
-  motor1.setSpeed(0);  //Define minimum velocity
-  motor1.run(RELEASE); //stop the motor when release the button
-  motor2.setSpeed(0);  //Define minimum velocity
-  motor2.run(RELEASE); //rotate the motor clockwise
-  motor3.setSpeed(0);  //Define minimum velocity
-  motor3.run(RELEASE); //stop the motor when release the button
-  motor4.setSpeed(0);  //Define minimum velocity
-  motor4.run(RELEASE); //stop the motor when release the button
+void stop() {
+  motor1.setSpeed(255);  // Active braking
+  motor1.run(RELEASE);
+  motor2.setSpeed(255);
+  motor2.run(RELEASE);
+  motor3.setSpeed(255);
+  motor3.run(RELEASE);
+  motor4.setSpeed(255);
+  motor4.run(RELEASE);
+  delay(100); // Ensure full stop
 }
 
-// Function to measure the distance of the obstacles
-int getDistance() 
-{
+int getDistance() {
   digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
   digitalWrite(TRIG_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
 
-  long duration = pulseIn(ECHO_PIN, HIGH);
+  long duration = pulseIn(ECHO_PIN, HIGH, 20000); // Timeout after 20ms
+  if (duration == 0) {
+    return 0; // No pulse received
+  }
   return duration * 0.034 / 2; // Convert to cm
 }
 
-void self_Drive(int CAR_SPEED);
-{
-  // Search for black line on the road
+int getStopDistance() {
+  if (SPEED == HIGH_SPEED) return STOP_DISTANCE_HIGH_SPEED;
+  if (SPEED == MEDIUM_SPEED) return STOP_DISTANCE_MEDIUM_SPEED;
+  return STOP_DISTANCE_LOW_SPEED;
+}
+
+void self_Drive(int CAR_SPEED) {
   int rightIRSensorValue = digitalRead(IR_SENSOR_RIGHT);
   int leftIRSensorValue = digitalRead(IR_SENSOR_LEFT);
 
-   //If none of the sensors detects black line, then go straight
-  if (rightIRSensorValue == LOW && leftIRSensorValue == LOW)
-  {
-    Serial.println("Forward");
+  if (rightIRSensorValue == LOW && leftIRSensorValue == LOW) {
     forward(CAR_SPEED);
-  }
-  //If right sensor detects black line, then turn right
-  else if (rightIRSensorValue == HIGH && leftIRSensorValue == LOW )
-  {
+  } else if (rightIRSensorValue == HIGH && leftIRSensorValue == LOW) {
     right(CAR_SPEED);
-  }
-  //If left sensor detects black line, then turn left  
-  else if (rightIRSensorValue == LOW && leftIRSensorValue == HIGH )
-  {
+  } else if (rightIRSensorValue == LOW && leftIRSensorValue == HIGH) {
     left(CAR_SPEED);
-  } 
-  //If both the sensors detect black line, then stop 
-  else 
-  {
+  } else {
     stop();
   }
-
 }
