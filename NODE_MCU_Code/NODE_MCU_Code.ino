@@ -30,7 +30,7 @@ void loop()
 
     if (receivedData.length() > 0 && receivedData.charAt(0) == 'F') 
     {
-      ESPSerial.println("(");
+      ESPSerial.println("F");
     }
   }
 }
