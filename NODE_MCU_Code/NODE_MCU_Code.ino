@@ -25,30 +25,30 @@ void loop()
 {
   if (ESPSerial.available()) 
   {
-    String receivedData = ESPSerial.readStringUntil('\n');
+    uint8_t receivedData = ESPSerial.read();
     
     // If data is valid, process it
     if (receivedData != 0) 
     {
-      Serial.println("Data received from ESP32: " + receivedData);
+      Serial.println("Data received from ESP32: " + (String) receivedData);
     }
     
 
-    if (receivedData.length() > 0 && receivedData.charAt(0) == 'F') 
+    if (receivedData == (uint8_t) 'F') 
     {
       ESPSerial.write('X');
     }
-    else if (receivedData.length() > 0 && receivedData.charAt(0) == 'R')
+    else if (receivedData == (uint8_t)'R')
     {
       ESPSerial.write('Y');
     }
-    else if (receivedData.length() > 0 && receivedData.charAt(0) == 'B')
+    else if (receivedData == (uint8_t) 'B')
     {
       ESPSerial.write('Z');
     }
     else 
     {
-        Serial.println("Unknown command received: " + receivedData);
+      Serial.println("Unknown command received: " + (String) receivedData);
     }
   }
 }
