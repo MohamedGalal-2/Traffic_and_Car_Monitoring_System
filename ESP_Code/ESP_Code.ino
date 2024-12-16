@@ -627,8 +627,8 @@ void setup()
     // Send the command to STM32 via UART
     STM_command = command[0];
     UARTSerial.write(STM_command);  // Send the command to STM32
-    Serial.println(sizeof(STM_command));
-    Serial.println(STM_command);
+    // Serial.println(sizeof(STM_command)); // Debugging
+    // Serial.println(STM_command);         // Debugging
 
     // Respond with the received command
     String html = "<html><body><h2>ESP32 Command Sent to Arduino: " + command + "</h2></body></html>";
@@ -646,9 +646,9 @@ void loop()
   if (UARTSerial.available()) 
   {
     uint8_t receivedData = UARTSerial.read();  // Read data until newline
-
+      
     // Print the received data to the Serial Monitor
-    Serial.println("Data received from STM32: " + receivedData);
+    Serial.println("Data received from STM32: " + (String) receivedData);
     
     // Process the data
     if (receivedData == (uint8_t)'X') 
