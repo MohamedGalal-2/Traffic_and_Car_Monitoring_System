@@ -32,5 +32,13 @@ void loop()
     {
       ESPSerial.println("F");
     }
+    else if (receivedData.length() > 0 && receivedData.charAt(0) == 'R')
+    {
+      ESPSerial.println("R");
+    }
+    else if (receivedData.length() > 0 && receivedData.charAt(0) == 'B')
+    {
+      ESPSerial.println("B");
+    }
   }
 }

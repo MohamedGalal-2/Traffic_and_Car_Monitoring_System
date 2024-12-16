@@ -13,7 +13,7 @@
 // Set car speed profiles
 const int HIGH_SPEED = 255;
 const int MEDIUM_SPEED = 170;
-const int LOW_SPEED = 85;
+const int LOW_SPEED = 100;
 int SPEED = MEDIUM_SPEED;
 
 // Define stopping distances
@@ -43,6 +43,9 @@ void setup() {
 
   // Set the baud rate for Bluetooth module
   HC05.begin(9600);
+
+  //This sets frequecny as 7812.5 hz.
+  TCCR0B = (TCCR0B & (B11111000)) | B00000010;
 }
 
 void loop() {
@@ -98,7 +101,7 @@ void loop() {
       case 'S':
         self_Drive(SPEED);
         break;
-    }
+     }
   }
 }
 
@@ -130,7 +133,7 @@ void left(int CAR_SPEED) {
   motor2.setSpeed(CAR_SPEED);
   motor2.run(FORWARD);
   motor3.setSpeed(CAR_SPEED);
-  motor3.run(FORWARD);
+  motor3.run(BACKWARD);
   motor4.setSpeed(CAR_SPEED);
   motor4.run(FORWARD);
 }
@@ -143,7 +146,7 @@ void right(int CAR_SPEED) {
   motor3.setSpeed(CAR_SPEED);
   motor3.run(FORWARD);
   motor4.setSpeed(CAR_SPEED);
-  motor4.run(FORWARD);
+  motor4.run(BACKWARD);
 }
 
 void stop() {
