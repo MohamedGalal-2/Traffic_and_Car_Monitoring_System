@@ -1,0 +1,7 @@
+../Core/Src/freertos.c:139:6:MX_FREERTOS_Init	8	static
+../Core/Src/freertos.c:204:6:StartDefaultTask	16	static
+../Core/Src/freertos.c:275:6:traffic_light	16	static
+../Core/Src/freertos.c:301:6:servo_control	16	static
+../Core/Src/freertos.c:339:6:StartTrans	16	static
+../Core/Src/freertos.c:357:6:display	16	static
+../Core/Src/freertos.c:381:6:HAL_UART_RxCpltCallback	16	static
